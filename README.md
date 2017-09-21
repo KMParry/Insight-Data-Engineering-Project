@@ -35,3 +35,28 @@ Interface:
  
  
 
+
+Directory Structure
+
+
+src
+|
+|--kafka_consumer
+|     |
+|     |-kafka_consumer.py
+|     
+|--kafka_producer
+|     |
+|     |-kafka_producer.py **
+|     
+|--HDFS
+|     |
+|     |-kafka_to_hdfs.py *******
+| 
+|
+|--redis
+|
+|
+|--frontend
+
+
