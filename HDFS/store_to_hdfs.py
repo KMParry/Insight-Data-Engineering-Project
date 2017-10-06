@@ -1,12 +1,12 @@
-import json, os, random,time
+import json, os, time
 from confluent_kafka import Consumer, KafkaError
-import redis
 
-class Consumer_redis(object):
+
+class Consumer_HDFS(object):
 	
 	def __init__(self,conf,addr,topic,group):
 		
-		print 'Initiated a kafka consumer for REDIS...'
+		print 'Initiated a kafka consumer for HDFS...'
 		self.conf=conf
 		self.address=addr	
 		self.topic=topic
@@ -37,44 +37,48 @@ class Consumer_redis(object):
 			message = self.consumer.poll()
 			if not message.error():
 				print ('Received message %s' % (message.value().decode('utf-8')))
-				self.store_to_redis(output_dir)
+				self.flush_to_hdfs(output_dir)
 			elif message.error() !=KafkaError._PARTITION_EOF:
 				print(message.error())
 				running = False
 
+		#for ii in range(0,2):
+		#	try:
+				#########################3
+				###messages=self.consumer.get_messages(count=1000, block=False)
+		#		messages=self.consumer.poll(timeout=3.0)
+
+		#	print messages
+			#	for message in messages:
+			#		self.temp_file.write(message.message.value + "\n")
+
+			#	if self.temp_file.tell() > 20000000:
+			#		self.flush_to_hdfs(output_dir)
+			
+			#	self.consumer.commit()
+
+			#except:
+			#	self.consumer.seek(0,2)
 		
-	def store_to_redis(self,output_dir):
-		
-		print 'testing store_to_redis function'
-
-		r=redis.StrictRedis(host="localhost",port=6379,db=0)
-		lon=random.uniform(-121.0, -120.0)
-		lat=random.uniform(37.0, 38.0)
-		pid=str(random.randint(1,100))
-		print 'pid is %s'%pid		
-
-		r.geoadd("sanfran", lon,lat,pid)
-
-		r.set(pid,0)
 
 
+	def flush_to_hdfs(self, output_dir):
 
-	#def flush_to_hdfs(self, output_dir):
-
-	#	print 'testing flush to hdfs function...'
-	#	self.temp_file.close()
-	#	timestamp = time.strftime('%Y%m%d%H%M%S')
+		print 'testing flush to hdfs function...'
+		self.temp_file.close()
+		timestamp = time.strftime('%Y%m%d%H%M%S')
 	
-	#	hadoop_fullpath="%s/%s_%s_%s.dat" %(self.hadoop_path, 
-		#			self.group, self.topic, timestamp)
+		hadoop_fullpath="%s/%s_%s_%s.dat" %(self.hadoop_path, 
+					self.group, self.topic, timestamp)
 
+		#print "Block {}:Flushing 20MB file to HDFS => {}".format(str(self.block_cnt),hadoop_fullpath)
 
-	#	self.block_cnt += 1
+		self.block_cnt += 1
 		
-	#	print("hdfs dfs -put %s hdfs:%s" %(self.temp_file_path,
-		#						output_dir))
-	#	os.system("hdfs dfs -put %s hdfs:%s" %(self.temp_file_path,
-	#							output_dir))
+		print("hdfs dfs -put %s hdfs:%s" %(self.temp_file_path,
+								output_dir))
+		os.system("hdfs dfs -put %s hdfs:%s" %(self.temp_file_path,
+								output_dir))
 		
 		##################################
 		# os.remove(self.temp_file_path)
@@ -89,10 +93,9 @@ class Consumer_redis(object):
 		#self.temp_file=open(self.temp_file_path, "w")
 
 
-
 def main():
 
-	print "\nTesting redis consumer..."
+	print "\nTesting HDFS consumer..."
 	
 	conf={'bootstrap.servers':'ec2-35-166-130-18.us-west-2.compute.amazonaws.com:9092','bootstrap.servers':'ec2-35-160-85-146.us-west-2.compute.amazonaws.com:9092','bootstrap.servers':'ec2-34-214-129-134.us-west-2.compute.amazonaws.com:9092','group.id':'my_group'}
 	kafka_brokers={'bootstrap.servers':'ec2-35-166-130-18.us-west-2.compute.amazonaws.com:9092','bootstrap.servers':'ec2-35-160-85-146.us-west-2.compute.amazonaws.com:9092','bootstrap.servers':'ec2-34-214-129-134.us-west-2.compute.amazonaws.com:9092'}
@@ -100,11 +103,13 @@ def main():
         group='my_group'
 
 
-	cons=Consumer_redis(conf,kafka_brokers,parking_meters,group)
-	cons.consume_topic("/home/ubuntu")
+	cons=Consumer_HDFS(conf,kafka_brokers,parking_meters,group)
+	cons.consume_topic("/home/ubuntu/py-kafka-hdfs")
 
-	#cons.get_in_rad("3",0.5)
 if __name__=='__main__':
 
 	main()
- 
+
+	#cons_gps=Consumer_HDFS(kafka_brokers,group='my-group', topic='user-gps-topic')
+	#cons_gps.consume_topic("/home/ubuntu/py-kafka-hdfs/")
+	#cons_gps.flush_to_hdfs("/user_gps/")

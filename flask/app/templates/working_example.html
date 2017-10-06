@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+            {{"decoupled-map"|googlemap_js(37.4419, -122.1419, markers=[(37.4419, -122.1419)])}}
+            {{mymap.js}}
+            {{sndmap.js}}
+            {{thrdmap.js}}
+    </head>
+    <body>
+
+        <!--<h2> Map with two markers </h2>
+        {% with map=googlemap_obj("another-map", 37.4419, -122.1419, markers=[(37.4419, -122.1419), (37.4300, -122.1400)]) %}
+            {{thrdmap.html}}
+            {{thrdmap.js}}
+        {% endwith %}-->
+
+	<!--
+        <h2> Map with two markers </h2>
+        {% with map=googlemap_obj("another-map", 37.4419, -122.1419, markers=[(37.4419, -122.1419), (37.4300, -122.1400)]) %}
+            {{thrdmap.html}}
+            {{thrdmap.js}}
+        {% endwith %}
+	-->
+
+	<script>
+
+		function myMap(){
+			var mapProp={
+				center: new google.maps.LatLng(37.4419, -122.1419),
+                		zoom: 15
+			}
+			var map = new google.maps.Map(document.getElementById("googleMap"),mapProp)
+			var markers=[]			
+			var infowindow = new google.maps.InfoWindow({
+                                        content: null
+                        });
+		}
+		
+	</script>
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwfcLtwYD5C7onl9TVetTpYHq3okLw59Y&amp;callback=myMap"></script>
+    </body>
+</html>
+
